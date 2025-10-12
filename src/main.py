@@ -1,7 +1,10 @@
 import requests
 from supabase import create_client
 import os
-import time
+from dotenv import load_dotenv  # ← AÑADIDO
+
+# ← AÑADIDO
+load_dotenv()
 
 print("🚀 Iniciando sistema de monitoreo de sensores...")
 
@@ -17,11 +20,12 @@ def get_sensor_data():
         response = requests.get(SENSORS_API)
         if response.status_code == 200:
             data = response.json()
-            if isinstance(data, list) and len(data) > 0:
-                print(f"✅ Datos obtenidos: {len(data)} registros")
-                return data
+            if isinstance(data, dict) and 'temperatura' in data:
+                sensor_list = data['temperatura']
+                print(f"✅ Datos obtenidos: {len(sensor_list)} registros")
+                return sensor_list
             else:
-                print("ℹ️ La API respondió pero no hay datos en formato lista")
+                print("ℹ️ La API respondió pero no en el formato esperado")
                 return []
         else:
             print(f"❌ Error API: {response.status_code}")
@@ -40,16 +44,16 @@ def save_to_supabase(data):
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
         
         # Insertar datos
-        for sensor in data[:5]:  # Solo primeros 5 para prueba
+        for sensor in data[:3]:  # Solo primeros 3 para prueba
             result = supabase.table('sensors').insert({
-                'sensor_id': 'sensor_temperatura',
+                'sensor_id': f"sensor_{sensor.get('value', 0)}",  # ID único
                 'temperature': sensor.get('value', 0),
                 'humidity': 0,
                 'timestamp': sensor.get('timestamp'),
                 'latitude': sensor.get('coords', {}).get('lat'),
                 'longitude': sensor.get('coords', {}).get('lon')
             }).execute()
-            print(f"✅ Sensor guardado")
+            print(f"✅ Sensor {sensor.get('value')} guardado")
             
     except Exception as e:
         print(f"❌ Error guardando en Supabase: {e}")
