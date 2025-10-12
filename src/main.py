@@ -17,8 +17,13 @@ def get_sensor_data():
         response = requests.get(SENSORS_API)
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Datos obtenidos: {len(data)} registros")
-            return data
+            # CAMBIA ESTA PARTE:
+            if isinstance(data, list) and len(data) > 0:
+                print(f"✅ Datos obtenidos: {len(data)} registros")
+                return data
+            else:
+                print("ℹ️ La API respondió pero no hay datos en formato lista")
+                return []
         else:
             print(f"❌ Error API: {response.status_code}")
             return []
