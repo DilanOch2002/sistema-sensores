@@ -17,7 +17,6 @@ def get_sensor_data():
         response = requests.get(SENSORS_API)
         if response.status_code == 200:
             data = response.json()
-            # CAMBIA ESTA PARTE:
             if isinstance(data, list) and len(data) > 0:
                 print(f"✅ Datos obtenidos: {len(data)} registros")
                 return data
@@ -41,17 +40,16 @@ def save_to_supabase(data):
         supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
         
         # Insertar datos
-       # En la función save_to_supabase, cambia esto:
-for sensor in data[:5]:  # Solo primeros 5 para prueba
-    result = supabase.table('sensors').insert({
-        'sensor_id': 'sensor_temperatura',  # O usa algún ID único
-        'temperature': sensor.get('value', 0),  # ← CAMBIA AQUÍ
-        'humidity': 0,  # Este sensor no tiene humedad
-        'timestamp': sensor.get('timestamp'),
-        'latitude': sensor.get('coords', {}).get('lat'),
-        'longitude': sensor.get('coords', {}).get('lon')
-    }).execute()
-            print(f"✅ Sensor {sensor.get('id')} guardado")
+        for sensor in data[:5]:  # Solo primeros 5 para prueba
+            result = supabase.table('sensors').insert({
+                'sensor_id': 'sensor_temperatura',
+                'temperature': sensor.get('value', 0),
+                'humidity': 0,
+                'timestamp': sensor.get('timestamp'),
+                'latitude': sensor.get('coords', {}).get('lat'),
+                'longitude': sensor.get('coords', {}).get('lon')
+            }).execute()
+            print(f"✅ Sensor guardado")
             
     except Exception as e:
         print(f"❌ Error guardando en Supabase: {e}")
