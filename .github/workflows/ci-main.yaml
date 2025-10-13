@@ -24,20 +24,20 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: 🧪 Probar conexión API
-  run: |
-    python -c "
-    import requests
-    response = requests.get('https://sensores-async-api.onrender.com/api/sensors/all')
-    print(f'✅ API responde: {response.status_code}')
-    data = response.json()
-    # CAMBIA ESTO:
-    if isinstance(data, dict) and 'temperatura' in data:
-        sensor_data = data['temperatura']
-        print(f'📊 Datos obtenidos: {len(sensor_data)} registros')
-        print(f'📊 Ejemplo: {sensor_data[0] if sensor_data else \"No data\"}')
-    else:
-        print('📊 Formato inesperado:', type(data))
-    "
+        run: |  # ← ESTA LÍNEA FALTABA
+          python -c "
+          import requests
+          response = requests.get('https://sensores-async-api.onrender.com/api/sensors/all')
+          print(f'✅ API responde: {response.status_code}')
+          data = response.json()
+          if isinstance(data, dict) and 'temperatura' in data:
+              sensor_data = data['temperatura']
+              print(f'📊 Datos obtenidos: {len(sensor_data)} registros')
+              print(f'📊 Ejemplo: {sensor_data[0] if sensor_data else \"No data\"}')
+          else:
+              print('📊 Formato inesperado:', type(data))
+          "
+
   deploy:
     needs: test-sensors
     runs-on: ubuntu-latest
