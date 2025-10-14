@@ -1,0 +1,9 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "cd frontend && npm run dev"
+
+[[services]]
+name = "web"
+run = "cd frontend && npm run dev"
