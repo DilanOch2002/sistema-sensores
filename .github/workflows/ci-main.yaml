@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/sensor-app
+  IMAGE_NAME: ghcr.io/dilanoch2002/sistema-sensores/sensor-app
 
 jobs:
   test-sensors:
