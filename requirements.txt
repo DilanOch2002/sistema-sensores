@@ -1,7 +1,5 @@
-supabase
-requests
-python-dotenv
-pytest
-asyncio
-flask==2.3.3
+supabase==1.0.3
 aiohttp==3.8.5
+python-dotenv==1.0.0
+flask==2.3.3
+requests==2.31.0
