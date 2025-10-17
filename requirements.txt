@@ -2,3 +2,5 @@ supabase
 requests
 python-dotenv
 pytest
+asyncio
+flask==2.3.3

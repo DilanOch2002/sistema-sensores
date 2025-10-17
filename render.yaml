@@ -1,0 +1,59 @@
+services:
+  # Frontend React
+  - type: web
+    name: agricola-frontend
+    env: static
+    buildCommand: npm run build
+    publish: dist/
+    headers:
+      - path: /*
+        name: Cache-Control
+        value: no-cache
+
+  # Servicio A - Auth
+  - type: web
+    name: auth-service
+    env: python
+    buildCommand: pip install -r backend/auth-service/requirements.txt
+    startCommand: cd backend/auth-service && python app.py
+    envVars:
+      - key: SUPABASE_URL
+        value: https://vqezennldyqazxjmyrfj.supabase.co
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxZXplbm5sZHlxYXp4am15cmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyNTUzNjIsImV4cCI6MjA3NTgzMTM2Mn0.TSuCHoKKabXAQ2FlRn7BFYa_ii7WKBSBrkRr8xsuf5s
+
+  # Servicio B - Sensores (HTTP)
+  - type: web  
+    name: sensors-service
+    env: python
+    buildCommand: pip install -r backend/sensor-service/requirements.txt
+    startCommand: cd backend/sensor-service && python app.py
+    envVars:
+      - key: SUPABASE_URL
+        value: https://vqezennldyqazxjmyrfj.supabase.co
+      - key: SUPABASE_KEY  
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxZXplbm5sZHlxYXp4am15cmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyNTUzNjIsImV4cCI6MjA3NTgzMTM2Mn0.TSuCHoKKabXAQ2FlRn7BFYa_ii7WKBSBrkRr8xsuf5s
+
+  # Servicio C - Ingesta
+  - type: web
+    name: ingestion-service
+    env: python
+    buildCommand: pip install -r backend/ingestion-service/requirements.txt
+    startCommand: cd backend/ingestion-service && python app.py
+    envVars:
+      - key: SUPABASE_URL
+        value: https://vqezennldyqazxjmyrfj.supabase.co
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxZXplbm5sZHlxYXp4am15cmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyNTUzNjIsImV4cCI6MjA3NTgzMTM2Mn0.TSuCHoKKabXAQ2FlRn7BFYa_ii7WKBSBrkRr8xsuf5s
+
+  # Servicio D - Parcelas
+  - type: web
+    name: plots-service
+    env: python
+    buildCommand: pip install -r backend/plots-service/requirements.txt
+    startCommand: cd backend/plots-service && python app.py
+    envVars:
+      - key: SUPABASE_URL
+        value: https://vqezennldyqazxjmyrfj.supabase.co
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZxZXplbm5sZHlxYXp4am15cmZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyNTUzNjIsImV4cCI6MjA3NTgzMTM2Mn0.TSuCHoKKabXAQ2FlRn7BFYa_ii7WKBSBrkRr8xsuf5s

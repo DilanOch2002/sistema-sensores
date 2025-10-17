@@ -1,87 +1,53 @@
-import { useState, useEffect } from 'react'
-import { createClient } from '@supabase/supabase-js'
-import './App.css'
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_KEY
-)
+import React, { useState } from 'react';
+import Dashboard from './components/Dashboard';
+import SensorCharts from './components/SensorCharts';
+import PlotMap from './components/PlotMap';
+import DeletedPlotsList from './components/DeletedPlotsList';
+import './App.css';
 
 function App() {
-  const [sensors, setSensors] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
-
-  useEffect(() => {
-    fetchSensors()
-  }, [])
-
-  const fetchSensors = async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const { data, error } = await supabase
-        .from('sensors')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(10)
-
-      if (error) {
-        console.error('Error de Supabase:', error)
-        setError('Error: ' + error.message)
-      } else {
-        setSensors(data || [])
-        console.log('Datos recibidos:', data)
-      }
-    } catch (err) {
-      console.error('Error general:', err)
-      setError('Error general: ' + err.message)
-    }
-    setLoading(false)
-  }
-
-  if (loading) return <div>Cargando sensores...</div>
+  const [activeTab, setActiveTab] = useState('dashboard');
 
   return (
-    <div className="App">
-      <h1>📊 Sistema de Sensores</h1>
-      
-      {error && (
-        <div style={{ color: 'red', margin: '10px 0' }}>
-          {error}
-        </div>
-      )}
-      
-      <p>Mostrando {sensors.length} sensores más recientes:</p>
-      
-      <table border="1">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Temperatura</th>
-            <th>Latitud</th>
-            <th>Longitud</th>
-            <th>Fecha</th>
-          </tr>
-        </thead>
-        <tbody>
-          {sensors.map(sensor => (
-            <tr key={sensor.id}>
-              <td>{sensor.id}</td>
-              <td>{sensor.temperature}°C</td>
-              <td>{sensor.latitude}</td>
-              <td>{sensor.longitude}</td>
-              <td>{new Date(sensor.created_at).toLocaleString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="app">
+      <header className="app-header">
+        <h1>🌱 Dashboard Agrícola IoT</h1>
+        <nav className="nav-tabs">
+          <button 
+            className={activeTab === 'dashboard' ? 'active' : ''} 
+            onClick={() => setActiveTab('dashboard')}
+          >
+            📊 Dashboard
+          </button>
+          <button 
+            className={activeTab === 'charts' ? 'active' : ''} 
+            onClick={() => setActiveTab('charts')}
+          >
+            📈 Gráficos
+          </button>
+          <button 
+            className={activeTab === 'map' ? 'active' : ''} 
+            onClick={() => setActiveTab('map')}
+          >
+            🗺️ Mapa
+          </button>
+          <button 
+            className={activeTab === 'deleted' ? 'active' : ''} 
+            onClick={() => setActiveTab('deleted')}
+          >
+            🗑️ Parcelas Eliminadas
+          </button>
+        </nav>
+      </header>
 
-      <button onClick={fetchSensors} style={{marginTop: '20px'}}>
-        🔄 Actualizar
-      </button>
+      <main className="app-main">
+        {activeTab === 'dashboard' && <Dashboard />}
+        {activeTab === 'charts' && <SensorCharts />}
+        {activeTab === 'map' && <PlotMap />}
+        {activeTab === 'deleted' && <DeletedPlotsList />}
+      </main>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

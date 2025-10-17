@@ -3,6 +3,8 @@ CREATE TABLE IF NOT EXISTS sensors (
     sensor_id VARCHAR(100) NOT NULL,
     temperature DECIMAL,
     humidity DECIMAL,
+    rain DECIMAL,
+    solar_radiation DECIMAL,
     timestamp TIMESTAMPTZ,
     latitude DECIMAL,
     longitude DECIMAL,
