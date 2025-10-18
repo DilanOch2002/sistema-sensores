@@ -20,7 +20,8 @@ class AdvancedSensorEmulator:
     def __init__(self):
         self.sensors = []
         self.supabase = create_client(SUPABASE_URL, SUPABASE_KEY) if SUPABASE_URL and SUPABASE_KEY else None
-        self.ingestion_service_url = "http://ingestion-service:5001"  # Para Kubernetes
+        # CAMBIÉ la URL para Render
+        self.ingestion_service_url = "https://ingestion-service.onrender.com"
         
     def generate_sensors(self, count=50):
         """Genera sensores virtuales con ubicaciones en México"""
@@ -145,20 +146,31 @@ class AdvancedSensorEmulator:
             print(f"❌ Error enviando a ingesta: {e}")
             return False
     
-    async def send_direct_to_supabase(self, sensor_data):
+    async def send_direct_to_supabase(self, sensor_data):  # CORREGÍ EL NOMBRE DEL PARÁMETRO
         """Envía directamente a Supabase (fallback)"""
         if not self.supabase:
             return False
             
         try:
-            result = self.supabase.table('sensor_data').insert({
+            # CORREGÍ: Usar tabla 'sensors' y mapear campos correctamente
+            sensor_record = {
                 'sensor_id': sensor_data['sensor_id'],
-                'value': sensor_data['value'],
-                'type': sensor_data['type'],
                 'timestamp': sensor_data['timestamp'],
-                'location': sensor_data['city'],
-                'unit': sensor_data['unit']
-            }).execute()
+                'latitude': sensor_data.get('latitude'),
+                'longitude': sensor_data.get('longitude')
+            }
+            
+            # Mapear valores según el tipo de sensor
+            if sensor_data['type'] == 'temperature':
+                sensor_record['temperature'] = sensor_data['value']
+            elif sensor_data['type'] == 'humidity':
+                sensor_record['humidity'] = sensor_data['value']
+            elif sensor_data['type'] == 'rain':
+                sensor_record['rain'] = sensor_data['value']
+            elif sensor_data['type'] == 'solar_radiation':
+                sensor_record['solar_radiation'] = sensor_data['value']
+            
+            result = self.supabase.table('sensors').insert(sensor_record).execute()
             
             if result.data:
                 print(f"✅ {sensor_data['sensor_id']}: {sensor_data['value']} {sensor_data['unit']}")
@@ -269,13 +281,8 @@ class AdvancedSensorEmulator:
 async def main():
     emulator = AdvancedSensorEmulator()
     
-    # 🎯 ELIGE EL MODO DE OPERACIÓN:
-    
-    # 1. Operación normal (descomenta esta línea)
+    # 🎯 SOLO operación normal - comenté la prueba de estrés
     await emulator.start_normal_operation(sensor_count=20)
-    
-    # 2. Prueba de estrés 10,000+ registros (descomenta esta línea)
-    # await emulator.run_stress_test(duration=50, sensor_count=200)
 
 if __name__ == "__main__":
     try:
