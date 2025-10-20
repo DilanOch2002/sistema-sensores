@@ -53,12 +53,11 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🏗️ Construir imagen Docker
-  run: |
-    docker build -t $IMAGE_NAME:latest -f src/sensor-service/Dockerfile src/sensor-service
+  run: docker build -t $IMAGE_NAME:latest -f src/sensor-service/Dockerfile src/sensor-service
 
-      - name: 🚀 Empujar imagen
-        run: |
-          docker push $IMAGE_NAME:latest
+- name: 🚀 Empujar imagen
+  run: docker push $IMAGE_NAME:latest
 
-      - name: ✅ Completado
-        run: echo "🎉 Sistema desplegado correctamente!"
+- name: ✅ Completado
+  run: echo "🎉 Sistema desplegado correctamente!"
+
