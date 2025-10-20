@@ -1,0 +1,36 @@
+/* src/components/PlotMap.css */
+.plot-map-container {
+  margin: 1rem;
+}
+
+.plot-info {
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.plots-list {
+  margin-top: 1rem;
+}
+
+.plots-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.plot-card {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 0.5rem;
+  cursor: pointer;
+  width: 200px;
+  transition: all 0.2s;
+}
+
+.plot-card.active,
+.plot-card:hover {
+  background-color: #e6f7ff;
+  border-color: #91d5ff;
+}

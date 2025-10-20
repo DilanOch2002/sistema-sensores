@@ -14,8 +14,8 @@ services:
   - type: web
     name: auth-service
     env: python
-    buildCommand: pip install -r backend/auth-service/requirements.txt
-    startCommand: cd backend/auth-service && python app.py
+    buildCommand: pip install -r src/auth-service/requirements.txt
+    startCommand: cd src/auth-service && python app.py
     envVars:
       - key: SUPABASE_URL
         value: https://vqezennldyqazxjmyrfj.supabase.co
@@ -26,8 +26,8 @@ services:
   - type: web  
     name: sensors-service
     env: python
-    buildCommand: pip install -r backend/sensor-service/requirements.txt
-    startCommand: cd backend/sensor-service && python app.py
+    buildCommand: pip install -r src/sensor-service/requirements.txt
+    startCommand: cd src/sensor-service && python app.py
     envVars:
       - key: SUPABASE_URL
         value: https://vqezennldyqazxjmyrfj.supabase.co
@@ -38,8 +38,8 @@ services:
   - type: web
     name: ingestion-service
     env: python
-    buildCommand: pip install -r backend/ingestion-service/requirements.txt
-    startCommand: cd backend/ingestion-service && python app.py
+    buildCommand: pip install -r src/ingestion-service/requirements.txt
+    startCommand: cd src/ingestion-service && python app.py
     envVars:
       - key: SUPABASE_URL
         value: https://vqezennldyqazxjmyrfj.supabase.co
@@ -50,8 +50,8 @@ services:
   - type: web
     name: plots-service
     env: python
-    buildCommand: pip install -r backend/plots-service/requirements.txt
-    startCommand: cd backend/plots-service && python app.py
+    buildCommand: pip install -r src/plots-service/requirements.txt
+    startCommand: cd src/plots-service && python app.py
     envVars:
       - key: SUPABASE_URL
         value: https://vqezennldyqazxjmyrfj.supabase.co

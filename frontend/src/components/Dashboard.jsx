@@ -7,17 +7,20 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('🎯 Dashboard montado, iniciando fetch...');
     fetchDashboardData();
-    const interval = setInterval(fetchDashboardData, 5000); // Actualizar cada 5s
+    const interval = setInterval(fetchDashboardData, 5000);
     return () => clearInterval(interval);
   }, []);
 
   const fetchDashboardData = async () => {
+    console.log('🔄 Ejecutando fetchDashboardData...');
     try {
       const data = await sensorsAPI.getLatest();
+      console.log('📈 Datos para dashboard:', data);
+      
       setSensorData(data.sensors || []);
       
-      // Calcular estadísticas
       if (data.sensors && data.sensors.length > 0) {
         const temps = data.sensors.map(s => s.temperature).filter(t => t != null);
         const humidities = data.sensors.map(s => s.humidity).filter(h => h != null);
@@ -27,9 +30,11 @@ const Dashboard = () => {
           avgHumidity: humidities.length ? (humidities.reduce((a, b) => a + b) / humidities.length).toFixed(1) : 'N/A',
           totalSensors: data.sensors.length
         });
+      } else {
+        console.log('⚠️ No hay datos de sensores');
       }
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error('❌ Error en fetchDashboardData:', error);
     } finally {
       setLoading(false);
     }
@@ -41,7 +46,6 @@ const Dashboard = () => {
     <div className="dashboard">
       <h2>🌡️ Dashboard en Tiempo Real</h2>
       
-      {/* Tarjetas de estadísticas */}
       <div className="stats-grid">
         <div className="stat-card">
           <h3>🌡️ Temp. Promedio</h3>
@@ -57,7 +61,6 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Tabla de sensores */}
       <div className="sensors-table">
         <h3>📊 Últimas Lecturas</h3>
         <table>
@@ -84,6 +87,11 @@ const Dashboard = () => {
             ))}
           </tbody>
         </table>
+        {sensorData.length === 0 && (
+          <p style={{textAlign: 'center', color: '#666', padding: '2rem'}}>
+            No hay datos de sensores disponibles
+          </p>
+        )}
       </div>
     </div>
   );

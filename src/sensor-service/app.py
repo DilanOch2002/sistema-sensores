@@ -4,8 +4,10 @@ import random
 from datetime import datetime, timedelta
 from threading import Thread
 import time
+from flask_cors import CORS  # ← AGREGAR ESTO
 
 app = Flask(__name__)
+CORS(app)
 
 # Datos simulados para el frontend
 sensor_data_cache = []

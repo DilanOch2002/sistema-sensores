@@ -1,18 +1,32 @@
-// URLs de Render - REEMPLAZA con tus URLs reales después del deploy
-const AUTH_SERVICE_URL = 'https://auth-service.onrender.com';
-const SENSORS_SERVICE_URL = 'https://sensors-service.onrender.com';
-const INGESTION_SERVICE_URL = 'https://ingestion-service.onrender.com';
-const PLOTS_SERVICE_URL = 'https://plots-service.onrender.com';
+// PRIMERO definir las constantes, LUEGO el console.log
+const AUTH_SERVICE_URL = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
+const SENSORS_SERVICE_URL = 'http://localhost:5003';
+const INGESTION_SERVICE_URL = 'http://localhost:5001';
+const PLOTS_SERVICE_URL = 'http://localhost:5002';
 
-// Servicio A - Autenticación
+// LUEGO el console.log
+console.log('🔧 URLs de API:', {
+  auth: AUTH_SERVICE_URL,
+  sensors: SENSORS_SERVICE_URL, 
+  plots: PLOTS_SERVICE_URL
+});
+
+// Servicio A - Autenticación CORREGIDO
 export const authAPI = {
   login: async (email, password) => {
-    const response = await fetch(`${AUTH_SERVICE_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
-    return response.json();
+    console.log('🔐 Llamando a auth/login');
+    try {
+      const response = await fetch(`${AUTH_SERVICE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      console.log('📊 Respuesta auth:', response.status);
+      return response.json();
+    } catch (error) {
+      console.error('❌ Error auth:', error);
+      throw error;
+    }
   },
 
   register: async (userData) => {
@@ -34,28 +48,49 @@ export const authAPI = {
   }
 };
 
-// Servicio B - Sensores
+// Servicio B - Sensores CORREGIDO
 export const sensorsAPI = {
   getLatest: async () => {
-    const response = await fetch(`${SENSORS_SERVICE_URL}/sensors/latest`);
-    return response.json();
+    console.log('📡 Llamando a sensors/latest');
+    try {
+      const response = await fetch(`${SENSORS_SERVICE_URL}/sensors/latest`);
+      console.log('📊 Respuesta sensors:', response.status);
+      const data = await response.json();
+      console.log('✅ Datos sensors:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Error sensors:', error);
+      throw error;
+    }
   },
 
   getHistorical: async (hours = 24) => {
-    const response = await fetch(`${SENSORS_SERVICE_URL}/sensors/historical?hours=${hours}`);
-    return response.json();
+    console.log('📈 Llamando a sensors/historical');
+    try {
+      const response = await fetch(`${SENSORS_SERVICE_URL}/sensors/historical?hours=${hours}`);
+      return response.json();
+    } catch (error) {
+      console.error('❌ Error historical:', error);
+      throw error;
+    }
   }
 };
 
-// Servicio C - Ingesta
+// Servicio C - Ingesta CORREGIDO
 export const ingestionAPI = {
   ingestData: async (sensorData) => {
-    const response = await fetch(`${INGESTION_SERVICE_URL}/ingest`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(sensorData)
-    });
-    return response.json();
+    console.log('📨 Llamando a ingestion/ingest');
+    try {
+      const response = await fetch(`${INGESTION_SERVICE_URL}/ingest`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(sensorData)
+      });
+      return response.json();
+    } catch (error) {
+      console.error('❌ Error ingestion:', error);
+      throw error;
+    }
   },
 
   batchIngest: async (sensorDataArray) => {
@@ -77,11 +112,20 @@ export const ingestionAPI = {
   }
 };
 
-// Servicio D - Parcelas
+// Servicio D - Parcelas CORREGIDO
 export const plotsAPI = {
   getAll: async () => {
-    const response = await fetch(`${PLOTS_SERVICE_URL}/plots`);
-    return response.json();
+    console.log('🌱 Llamando a plots/');
+    try {
+      const response = await fetch(`${PLOTS_SERVICE_URL}/plots`);
+      console.log('📊 Respuesta plots:', response.status);
+      const data = await response.json();
+      console.log('✅ Datos plots:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Error plots:', error);
+      throw error;
+    }
   },
 
   create: async (plotData) => {

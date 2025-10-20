@@ -4,8 +4,10 @@ import datetime
 from supabase import create_client
 import os
 import bcrypt
+from flask_cors import CORS  # ← AGREGAR ESTO
 
 app = Flask(__name__)
+CORS(app)  # ← Habilita CORS para que el frontend pueda acceder
 app.config['SECRET_KEY'] = 'clave-secreta-devops-2024'
 
 # Configuración Supabase
@@ -26,13 +28,13 @@ def register():
         role = data.get('role', 'user')
         
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-result = supabase.table('users').insert({
-    'email': email,
-    'password': hashed_password.decode('utf-8'),  # Hasheado
-    'role': role
-}).execute()
         
-        # Generar JWT
+        result = supabase.table('users').insert({
+            'email': email,
+            'password': hashed_password.decode('utf-8'),
+            'role': role
+        }).execute()
+        
         token = jwt.encode({
             'user_id': result.data[0]['id'],
             'email': email,
@@ -59,10 +61,10 @@ def login():
         # Verificar usuario en Supabase
         result = supabase.table('users').select('*').eq('email', email).execute()
         
-if not result.data or not bcrypt.checkpw(password.encode('utf-8'), result.data[0]['password'].encode('utf-8')):
-    return jsonify({"error": "Credenciales inválidas"}), 401
+        if not result.data or not bcrypt.checkpw(password.encode('utf-8'), result.data[0]['password'].encode('utf-8')):
+            return jsonify({"error": "Credenciales inválidas"}), 401
             
-user = result.data[0]
+        user = result.data[0]
         
         # Generar JWT
         token = jwt.encode({

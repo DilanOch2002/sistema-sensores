@@ -2,8 +2,10 @@ from flask import Flask, request, jsonify
 from supabase import create_client
 import os
 from datetime import datetime
+from flask_cors import CORS  # ← AGREGAR ESTO
 
 app = Flask(__name__)
+CORS(app)
 
 # Configuración Supabase
 supabase_url = os.getenv('SUPABASE_URL', 'https://vqezennldyqazxjmyrfj.supabase.co')
@@ -89,7 +91,7 @@ def update_plot(plot_id):
 def delete_plot(plot_id):
     try:
         # Obtener datos de la parcela antes de eliminar
-plot_result = supabase.table('plots').select('*').eq('id', plot_id).eq('deleted', False).execute()
+        plot_result = supabase.table('plots').select('*').eq('id', plot_id).eq('deleted', False).execute()
         
         if not plot_result.data:
             return jsonify({"error": "Parcela no encontrada"}), 404

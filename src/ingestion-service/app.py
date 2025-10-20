@@ -7,8 +7,10 @@ import asyncio
 import aiohttp
 from concurrent.futures import ThreadPoolExecutor
 import threading
+from flask_cors import CORS  # ← AGREGAR ESTO
 
 app = Flask(__name__)
+CORS(app)
 
 # Configuración Supabase
 supabase_url = os.getenv('SUPABASE_URL', 'https://vqezennldyqazxjmyrfj.supabase.co')
