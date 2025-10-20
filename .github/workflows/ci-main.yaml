@@ -20,8 +20,9 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: 📦 Instalar dependencias
-        run: pip install -r sensor-service/requirements.txt
+   - name: 📦 Instalar dependencias
+  run: pip install -r src/sensor-service/requirements.txt
+
 
       - name: 🧪 Probar conexión API
         run: |
