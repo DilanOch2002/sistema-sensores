@@ -20,29 +20,22 @@ jobs:
         with:
           python-version: '3.11'
 
-   - name: 📦 Instalar dependencias
-  run: pip install -r src/sensor-service/requirements.txt
-
+      - name: 📦 Instalar dependencias
+        run: pip install -r src/sensor-service/requirements.txt
 
       - name: 🧪 Probar conexión API
         run: |
-          python - <<EOF
+          python - <<'EOF'
           import requests
           url = "https://sensores-async-api.onrender.com/api/sensors/all"
-          print(f"📡 Probando conexión a: {url}")
           response = requests.get(url)
-          print(f"✅ API responde con: {response.status_code}")
-          data = response.json()
-          if isinstance(data, dict):
-              print(f"📊 Estructura de respuesta: {list(data.keys())}")
-              if 'temperatura' in data:
-                  sensor_data = data['temperatura']
-                  print(f"📊 Registros: {len(sensor_data)}")
-                  print(f"📌 Ejemplo: {sensor_data[0] if sensor_data else 'No data'}")
-              else:
-                  print("⚠️ Clave 'temperatura' no encontrada en la respuesta.")
-          else:
-              print(f"⚠️ Respuesta inesperada: {type(data)}")
+          print(f"✅ API responde: {response.status_code}")
+          try:
+              data = response.json()
+              print(f"📊 Tipo de datos: {type(data)}")
+              print(f"📊 Ejemplo: {str(data)[:300]}...")
+          except Exception as e:
+              print("❌ Error al parsear JSON:", e)
           EOF
 
   deploy:
@@ -60,10 +53,12 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🏗️ Construir imagen Docker
-        run: docker build -t $IMAGE_NAME:latest .
+        run: |
+          docker build -t $IMAGE_NAME:latest .
 
       - name: 🚀 Empujar imagen
-        run: docker push $IMAGE_NAME:latest
+        run: |
+          docker push $IMAGE_NAME:latest
 
       - name: ✅ Completado
         run: echo "🎉 Sistema desplegado correctamente!"
