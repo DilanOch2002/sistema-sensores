@@ -21,38 +21,27 @@ jobs:
           python-version: '3.11'
 
       - name: 📦 Instalar dependencias
-  run: pip install -r src/sensor-service/requirements.txt
-
+        run: pip install -r sensor-service/requirements.txt
 
       - name: 🧪 Probar conexión API
         run: |
-          python - << 'EOF'
+          python - <<EOF
           import requests
-
           url = "https://sensores-async-api.onrender.com/api/sensors/all"
-          print(f"🌐 Verificando API en: {url}")
-
-          try:
-              response = requests.get(url, timeout=10)
-              print(f"✅ Código de estado: {response.status_code}")
-
-              if response.status_code == 200:
-                  data = response.json()
-                  if isinstance(data, dict) and "temperatura" in data:
-                      sensor_data = data["temperatura"]
-                      print(f"📊 Registros obtenidos: {len(sensor_data)}")
-                      if sensor_data:
-                          print(f"📝 Ejemplo de dato: {sensor_data[0]}")
-                      else:
-                          print("⚠️ No hay datos de sensores.")
-                  else:
-                      print(f"⚠️ Estructura inesperada: {type(data)}")
+          print(f"📡 Probando conexión a: {url}")
+          response = requests.get(url)
+          print(f"✅ API responde con: {response.status_code}")
+          data = response.json()
+          if isinstance(data, dict):
+              print(f"📊 Estructura de respuesta: {list(data.keys())}")
+              if 'temperatura' in data:
+                  sensor_data = data['temperatura']
+                  print(f"📊 Registros: {len(sensor_data)}")
+                  print(f"📌 Ejemplo: {sensor_data[0] if sensor_data else 'No data'}")
               else:
-                  print("❌ Error: La API no respondió correctamente")
-
-          except Exception as e:
-              print(f"🚨 Error al conectar con la API: {e}")
-              exit(1)
+                  print("⚠️ Clave 'temperatura' no encontrada en la respuesta.")
+          else:
+              print(f"⚠️ Respuesta inesperada: {type(data)}")
           EOF
 
   deploy:
@@ -70,12 +59,10 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🏗️ Construir imagen Docker
-        run: |
-          docker build -t $IMAGE_NAME:latest .
+        run: docker build -t $IMAGE_NAME:latest .
 
       - name: 🚀 Empujar imagen
-        run: |
-          docker push $IMAGE_NAME:latest
+        run: docker push $IMAGE_NAME:latest
 
       - name: ✅ Completado
         run: echo "🎉 Sistema desplegado correctamente!"
