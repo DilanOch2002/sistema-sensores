@@ -5,5 +5,5 @@ python-dotenv==1.0.0
 supabase==1.0.3
 bcrypt==4.0.1
 aiohttp==3.8.5
-asyncio==3.4.3
 requests==2.31.0
+pytest==7.4.2

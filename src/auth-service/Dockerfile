@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copia el requirements desde la raíz
+# Copia el requirements desde la raíz del proyecto
 COPY ../../requirements.txt .
 
 # Actualiza pip e instala dependencias
