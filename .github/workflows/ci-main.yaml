@@ -1,62 +1,52 @@
-name: 🚀 Sistema de Sensores CI/CD
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main ]
-  workflow_dispatch:
-
-env:
-  IMAGE_NAME: ghcr.io/dilanoch2002/sistema-sensores/sensor-app
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  test-sensors:
+  build-and-deploy:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [auth-service, ingestion-service, plots-service, sensor-service]
+
     steps:
-      - name: 📥 Descargar código
-        uses: actions/checkout@v4
+    - name: Checkout repo
+      uses: actions/checkout@v3
 
-      - name: 🐍 Configurar Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.11'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
 
-      - name: 📦 Instalar dependencias
-        run: pip install -r src/sensor-service/requirements.txt
+    - name: Build Docker image
+      run: |
+        cd ${{ matrix.service }}
+        docker build -t myorg/${{ matrix.service }}:latest .
 
-      - name: 🧪 Probar conexión API
-        run: |
-          python - <<'EOF'
-          import requests
-          url = "https://sensores-async-api.onrender.com/api/sensors/all"
-          response = requests.get(url)
-          print(f"✅ API responde: {response.status_code}")
-          try:
-              data = response.json()
-              print(f"📊 Tipo de datos: {type(data)}")
-              print(f"📊 Ejemplo: {str(data)[:300]}...")
-          except Exception as e:
-              print("❌ Error al parsear JSON:", e)
-          EOF
+    - name: Run tests (health check)
+      run: |
+        cd ${{ matrix.service }}
+        docker run -d --name test-${{ matrix.service }} -p 5000:5000 myorg/${{ matrix.service }}:latest
+        sleep 5
+        curl -f http://localhost:5000/health
+        docker stop test-${{ matrix.service }}
 
-  deploy:
-    needs: test-sensors
-    runs-on: ubuntu-latest
-    steps:
-      - name: 📥 Descargar código
-        uses: actions/checkout@v4
+    - name: Push Docker image to registry
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+      run: |
+        echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+        docker tag myorg/${{ matrix.service }}:latest myorg/${{ matrix.service }}:latest
+        docker push myorg/${{ matrix.service }}:latest
 
-      - name: 🐳 Login a GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: 🏗️ Construir imagen Docker
-        run: docker build -t $IMAGE_NAME:latest -f src/sensor-service/Dockerfile src/sensor-service
-
-      - name: 🚀 Empujar imagen
-        run: docker push $IMAGE_NAME:latest
-
-      - name: ✅ Completado
-        run: echo "🎉 Sistema desplegado correctamente!"
+    - name: Deploy to Render
+      env:
+        RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      run: |
+        curl -X POST https://api.render.com/deploy/srv-XXXXXXXXXXXX \
+        -H "Authorization: Bearer $RENDER_API_KEY"
