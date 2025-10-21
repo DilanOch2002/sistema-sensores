@@ -1,0 +1,9 @@
+flask==2.3.3
+flask-cors==3.0.10
+pyjwt==2.8.0
+python-dotenv==1.0.0
+supabase==1.0.3
+bcrypt==4.0.1
+aiohttp==3.8.5
+requests==2.31.0
+pytest==7.4.2
