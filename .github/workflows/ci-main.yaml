@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI - Build & Test
 
 on:
   push:
@@ -7,38 +7,35 @@ on:
     branches: [main]
 
 jobs:
-  deploy-microservices:
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: [auth-service, ingestion-service, plots-service, sensor-service]
+        service: [auth-service, ingestion-service, plots-service, sensor-service, sistema-sensores]
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
 
-      - name: Health check before deploy
-        run: |
-          echo "Skipping Docker build, deploying directly to Render"
+    - name: Build Docker image
+      run: |
+        cd ${{ matrix.service }}
+        docker build -t myorg/${{ matrix.service }}:latest .
 
-      - name: Deploy to Render
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-        run: |
-          if [ "${{ matrix.service }}" == "auth-service" ]; then
-            curl -X POST https://api.render.com/deploy/srv-d3rdjtjipnbc73a7j7f0 \
-            -H "Authorization: Bearer $RENDER_API_KEY"
-          elif [ "${{ matrix.service }}" == "ingestion-service" ]; then
-            curl -X POST https://api.render.com/deploy/srv-d3rdorbipnbc739hfkgg \
-            -H "Authorization: Bearer $RENDER_API_KEY"
-          elif [ "${{ matrix.service }}" == "plots-service" ]; then
-            curl -X POST https://api.render.com/deploy/srv-d3rdma0dl3ps73fahbn0 \
-            -H "Authorization: Bearer $RENDER_API_KEY"
-          elif [ "${{ matrix.service }}" == "sensor-service" ]; then
-            curl -X POST https://api.render.com/deploy/srv-d3rdpq8dl3ps73fak0gg \
-            -H "Authorization: Bearer $RENDER_API_KEY"
-          fi
+    - name: Run Health Check
+      run: |
+        cd ${{ matrix.service }}
+        PORT=5000
+        if [ "${{ matrix.service }}" == "ingestion-service" ]; then PORT=5001; fi
+        if [ "${{ matrix.service }}" == "plots-service" ]; then PORT=5002; fi
+        if [ "${{ matrix.service }}" == "sensor-service" ]; then PORT=5003; fi
+        if [ "${{ matrix.service }}" == "sistema-sensores" ]; then PORT=80; fi
+        docker run -d --name test-${{ matrix.service }} -p $PORT:$PORT myorg/${{ matrix.service }}:latest
+        sleep 10
+        curl -f http://localhost:$PORT/health
+        docker stop test-${{ matrix.service }}
