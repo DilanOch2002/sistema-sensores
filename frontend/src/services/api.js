@@ -1,27 +1,25 @@
 // PRIMERO definir las constantes, LUEGO el console.log
-const AUTH_SERVICE_URL = import.meta.env.VITE_API_BASE || 'http://localhost:5000';
-const SENSORS_SERVICE_URL = 'http://localhost:5003';
-const INGESTION_SERVICE_URL = 'http://localhost:5001';
-const PLOTS_SERVICE_URL = 'http://localhost:5002';
+const AUTH_SERVICE_URL = 'https://sensor-auth-service.onrender.com';
+const SENSORS_SERVICE_URL = 'https://sensor-service-n1nv.onrender.com';
+const INGESTION_SERVICE_URL = 'https://ingestion-service-sy5n.onrender.com';
+const PLOTS_SERVICE_URL = 'https://plots-service.onrender.com';
 
-// LUEGO el console.log
 console.log('🔧 URLs de API:', {
   auth: AUTH_SERVICE_URL,
   sensors: SENSORS_SERVICE_URL, 
+  ingestion: INGESTION_SERVICE_URL,
   plots: PLOTS_SERVICE_URL
 });
 
-// Servicio A - Autenticación CORREGIDO
+// Servicio A - Autenticación
 export const authAPI = {
   login: async (email, password) => {
-    console.log('🔐 Llamando a auth/login');
     try {
       const response = await fetch(`${AUTH_SERVICE_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      console.log('📊 Respuesta auth:', response.status);
       return response.json();
     } catch (error) {
       console.error('❌ Error auth:', error);
@@ -48,16 +46,12 @@ export const authAPI = {
   }
 };
 
-// Servicio B - Sensores CORREGIDO
+// Servicio B - Sensores
 export const sensorsAPI = {
   getLatest: async () => {
-    console.log('📡 Llamando a sensors/latest');
     try {
       const response = await fetch(`${SENSORS_SERVICE_URL}/sensors/latest`);
-      console.log('📊 Respuesta sensors:', response.status);
-      const data = await response.json();
-      console.log('✅ Datos sensors:', data);
-      return data;
+      return response.json();
     } catch (error) {
       console.error('❌ Error sensors:', error);
       throw error;
@@ -65,7 +59,6 @@ export const sensorsAPI = {
   },
 
   getHistorical: async (hours = 24) => {
-    console.log('📈 Llamando a sensors/historical');
     try {
       const response = await fetch(`${SENSORS_SERVICE_URL}/sensors/historical?hours=${hours}`);
       return response.json();
@@ -76,10 +69,9 @@ export const sensorsAPI = {
   }
 };
 
-// Servicio C - Ingesta CORREGIDO
+// Servicio C - Ingesta
 export const ingestionAPI = {
   ingestData: async (sensorData) => {
-    console.log('📨 Llamando a ingestion/ingest');
     try {
       const response = await fetch(`${INGESTION_SERVICE_URL}/ingest`, {
         method: 'POST',
@@ -91,37 +83,15 @@ export const ingestionAPI = {
       console.error('❌ Error ingestion:', error);
       throw error;
     }
-  },
-
-  batchIngest: async (sensorDataArray) => {
-    const response = await fetch(`${INGESTION_SERVICE_URL}/batch-ingest`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(sensorDataArray)
-    });
-    return response.json();
-  },
-
-  stressTest: async (config = {}) => {
-    const response = await fetch(`${INGESTION_SERVICE_URL}/stress-test`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(config)
-    });
-    return response.json();
   }
 };
 
-// Servicio D - Parcelas CORREGIDO
+// Servicio D - Parcelas
 export const plotsAPI = {
   getAll: async () => {
-    console.log('🌱 Llamando a plots/');
     try {
       const response = await fetch(`${PLOTS_SERVICE_URL}/plots`);
-      console.log('📊 Respuesta plots:', response.status);
-      const data = await response.json();
-      console.log('✅ Datos plots:', data);
-      return data;
+      return response.json();
     } catch (error) {
       console.error('❌ Error plots:', error);
       throw error;
