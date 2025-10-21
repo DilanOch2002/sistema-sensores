@@ -1,39 +1,47 @@
+name: CI - Build & Test Microservices
+
+on:
+  push:
+    branches: [main]  # Se ejecuta automáticamente cuando haces push a main
+  pull_request:
+    branches: [main]  # También al hacer PR hacia main
+
 jobs:
-  build-and-deploy:
+  build-and-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service:
-          - src/auth-service
-          - src/ingestion-service
-          - src/plots-service
-          - src/sensor-service
+        include:
+          - service: src/auth-service
+            port: 5000
+          - service: src/ingestion-service
+            port: 5001
+          - service: src/plots-service
+            port: 5002
+          - service: src/sensor-service
+            port: 5003
 
     steps:
-    - name: Checkout repo
+    - name: Checkout del repositorio
       uses: actions/checkout@v3
 
-    - name: Set up Python
+    - name: Configurar Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
 
-    - name: Build Docker image
+    - name: Construir imagen Docker del microservicio
       run: |
         cd ${{ matrix.service }}
+        echo "📦 Construyendo imagen de ${{ matrix.service }}"
         docker build -t myorg/${{ matrix.service }}:latest .
 
-    - name: Run tests (health check)
+    - name: Prueba de salud del servicio (health check)
       run: |
         cd ${{ matrix.service }}
-        docker run -d --name test-${{ matrix.service }} -p 5000:5000 myorg/${{ matrix.service }}:latest
+        echo "🧪 Ejecutando health check en puerto ${{ matrix.port }}"
+        docker run -d --name test-${{ matrix.service }} -p ${{ matrix.port }}:${{ matrix.port }} myorg/${{ matrix.service }}:latest
         sleep 5
-        curl -f http://localhost:5000/health
+        curl -f http://localhost:${{ matrix.port }}/health
         docker stop test-${{ matrix.service }}
-
-    - name: Deploy to Render
-      env:
-        RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-      run: |
-        curl -X POST https://api.render.com/deploy/srv-XXXXXXXXXXXX \
-        -H "Authorization: Bearer $RENDER_API_KEY"
+        echo "✅ Health check completado correctamente"

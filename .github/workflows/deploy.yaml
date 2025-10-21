@@ -1,33 +1,38 @@
 name: Deploy to Render
 
 on:
-  workflow_dispatch: # Solo se ejecuta cuando tú manualmente le das "Run workflow"
-  
+  workflow_dispatch:  # Solo se ejecuta manualmente desde GitHub Actions
+
 jobs:
   deploy-services:
     runs-on: ubuntu-latest
     steps:
     - name: Deploy Auth Service
       run: |
+        echo "🚀 Desplegando Auth Service..."
         curl -X POST https://api.render.com/deploy/srv-d3rdjtjipnbc73a7j7f0 \
         -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
 
     - name: Deploy Ingestion Service
       run: |
+        echo "🚀 Desplegando Ingestion Service..."
         curl -X POST https://api.render.com/deploy/srv-d3rdorbipnbc739hfkgg \
         -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
 
     - name: Deploy Plots Service
       run: |
+        echo "🚀 Desplegando Plots Service..."
         curl -X POST https://api.render.com/deploy/srv-d3rdma0dl3ps73fahbn0 \
         -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
 
     - name: Deploy Sensor Service
       run: |
+        echo "🚀 Desplegando Sensor Service..."
         curl -X POST https://api.render.com/deploy/srv-d3rdpq8dl3ps73fak0gg \
         -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
 
-    - name: Deploy Frontend
+    - name: Deploy Frontend (React)
       run: |
+        echo "🚀 Desplegando Frontend (sistema-sensores)..."
         curl -X POST https://api.render.com/deploy/srv-d3ncul3ipnbc73b0epn0 \
         -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}"
