@@ -1,47 +1,61 @@
-name: CI - Build & Test Microservices
+name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main]  # Se ejecuta automáticamente cuando haces push a main
+    branches: [main]
   pull_request:
-    branches: [main]  # También al hacer PR hacia main
+    branches: [main]
 
 jobs:
-  build-and-test:
+  build-and-deploy:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - service: src/auth-service
-            port: 5000
-          - service: src/ingestion-service
-            port: 5001
-          - service: src/plots-service
-            port: 5002
-          - service: src/sensor-service
-            port: 5003
+        service:
+          - src/auth-service
+          - src/ingestion-service
+          - src/plots-service
+          - src/sensor-service
 
     steps:
-    - name: Checkout del repositorio
+    - name: Checkout repo
       uses: actions/checkout@v3
 
-    - name: Configurar Python
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
 
-    - name: Construir imagen Docker del microservicio
+    - name: Build Docker image
       run: |
+        echo "📦 Building Docker image for ${{ matrix.service }}"
         cd ${{ matrix.service }}
-        echo "📦 Construyendo imagen de ${{ matrix.service }}"
         docker build -t myorg/${{ matrix.service }}:latest .
 
-    - name: Prueba de salud del servicio (health check)
+    - name: Run tests (health check)
       run: |
+        echo "🧪 Running health check for ${{ matrix.service }}"
         cd ${{ matrix.service }}
-        echo "🧪 Ejecutando health check en puerto ${{ matrix.port }}"
-        docker run -d --name test-${{ matrix.service }} -p ${{ matrix.port }}:${{ matrix.port }} myorg/${{ matrix.service }}:latest
+        docker run -d --name test-${{ matrix.service }} -p 5000:5000 myorg/${{ matrix.service }}:latest
         sleep 5
-        curl -f http://localhost:${{ matrix.port }}/health
+        curl -f http://localhost:5000/health || (echo "❌ Health check failed for ${{ matrix.service }}" && exit 1)
         docker stop test-${{ matrix.service }}
-        echo "✅ Health check completado correctamente"
+
+    - name: Deploy to Render
+      env:
+        RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+      run: |
+        echo "🚀 Triggering Render deploy for ${{ matrix.service }}"
+
+        if [[ "${{ matrix.service }}" == "src/auth-service" ]]; then
+          SERVICE_ID="srv-d3rdjtjipnbc73a7j7f0"
+        elif [[ "${{ matrix.service }}" == "src/ingestion-service" ]]; then
+          SERVICE_ID="srv-d3rdorbipnbc739hfkgg"
+        elif [[ "${{ matrix.service }}" == "src/plots-service" ]]; then
+          SERVICE_ID="srv-d3rdma0dl3ps73fahbn0"
+        elif [[ "${{ matrix.service }}" == "src/sensor-service" ]]; then
+          SERVICE_ID="srv-d3rdpq8dl3ps73fak0gg"
+        fi
+
+        curl -X POST "https://api.render.com/deploy/$SERVICE_ID" \
+        -H "Authorization: Bearer $RENDER_API_KEY"
