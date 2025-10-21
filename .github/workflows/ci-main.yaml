@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD Main Pipeline
 
 on:
   push:
@@ -28,25 +28,36 @@ jobs:
 
     - name: Build Docker image
       run: |
-        echo "📦 Building Docker image for ${{ matrix.service }}"
         cd ${{ matrix.service }}
         docker build -t myorg/${{ matrix.service }}:latest .
 
     - name: Run tests (health check)
       run: |
-        echo "🧪 Running health check for ${{ matrix.service }}"
         cd ${{ matrix.service }}
-        docker run -d --name test-${{ matrix.service }} -p 5000:5000 myorg/${{ matrix.service }}:latest
-        sleep 5
-        curl -f http://localhost:5000/health || (echo "❌ Health check failed for ${{ matrix.service }}" && exit 1)
+
+        # Detecta puerto según el servicio
+        if [[ "${{ matrix.service }}" == "src/sensor-service" ]]; then
+          PORT=5003
+        elif [[ "${{ matrix.service }}" == "src/plots-service" ]]; then
+          PORT=5002
+        elif [[ "${{ matrix.service }}" == "src/ingestion-service" ]]; then
+          PORT=5001
+        else
+          PORT=5000
+        fi
+
+        echo "🧪 Iniciando test en puerto $PORT para ${{ matrix.service }}"
+
+        docker run -d --name test-${{ matrix.service }} -p $PORT:$PORT myorg/${{ matrix.service }}:latest
+        sleep 6
+        curl -f http://localhost:$PORT/health || (docker logs test-${{ matrix.service }} && exit 1)
         docker stop test-${{ matrix.service }}
 
     - name: Deploy to Render
       env:
         RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
       run: |
-        echo "🚀 Triggering Render deploy for ${{ matrix.service }}"
-
+        # Detecta ID de Render según el servicio
         if [[ "${{ matrix.service }}" == "src/auth-service" ]]; then
           SERVICE_ID="srv-d3rdjtjipnbc73a7j7f0"
         elif [[ "${{ matrix.service }}" == "src/ingestion-service" ]]; then
@@ -55,7 +66,10 @@ jobs:
           SERVICE_ID="srv-d3rdma0dl3ps73fahbn0"
         elif [[ "${{ matrix.service }}" == "src/sensor-service" ]]; then
           SERVICE_ID="srv-d3rdpq8dl3ps73fak0gg"
+        else
+          echo "Servicio desconocido"; exit 1
         fi
 
+        echo "🚀 Desplegando ${{ matrix.service }} en Render (ID: $SERVICE_ID)"
         curl -X POST "https://api.render.com/deploy/$SERVICE_ID" \
-        -H "Authorization: Bearer $RENDER_API_KEY"
+          -H "Authorization: Bearer $RENDER_API_KEY"
