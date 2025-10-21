@@ -3,6 +3,7 @@ const AUTH_SERVICE_URL = 'https://sensor-auth-service.onrender.com';
 const SENSORS_SERVICE_URL = 'https://sensor-service-n1nv.onrender.com';
 const INGESTION_SERVICE_URL = 'https://ingestion-service-sy5n.onrender.com';
 const PLOTS_SERVICE_URL = 'https://plots-service.onrender.com';
+//verificar que el front agarre el back
 
 console.log('🔧 URLs de API:', {
   auth: AUTH_SERVICE_URL,
